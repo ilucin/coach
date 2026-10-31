@@ -1,0 +1,7 @@
+{
+  "name": "coach",
+  "private": true,
+  "type": "module",
+  "bin": { "coach": "bin/coach.js" },
+  "scripts": { "test": "node --test test/*.test.js", "start": "node bin/coach.js serve" }
+}

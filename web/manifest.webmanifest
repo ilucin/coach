@@ -1,0 +1,3 @@
+{ "name": "Coach", "short_name": "Coach", "start_url": "/", "display": "standalone",
+  "background_color": "#f7f4f0", "theme_color": "#ec5b24",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }] }
