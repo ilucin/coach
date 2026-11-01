@@ -47,6 +47,16 @@ rekordom.
   ne 5").
 - U repou je `CLAUDE.md` s uputama za takav unos.
 
+## Dan: san, težina, hrana
+
+- **San**: ocjena 1–5 po danu (bez uređaja za mjerenje).
+- **Težina**: kg; prikazuje se tjedni prosjek i promjena od prošlog tjedna, graf tjednih prosjeka.
+- **Hrana**: stavke s oznakama `slatko`, `grickalice`, `kasno` (navečer). Cilj je smanjiti šećer
+  i grickalice navečer, pa se prate:
+  - niz dana bez slatkog i niz večeri bez grickalica (dan bez zapisa se broji kao čist);
+  - u tjednu: koliko dana bez slatkog i večeri bez grickalica.
+- Unos kroz Claude ili u appu (ekran Dan). Zdravstveni nalazi ostaju izvan Coacha.
+
 ## Aplikacija (PWA, mobitel prvi)
 
 - **Danas**: tekući trening. Za svaku vježbu oznaka zagrijavanja, radne serije i tri parametra
@@ -56,7 +66,8 @@ rekordom.
   - povijest treninga;
   - rekordi;
   - "zadnji put", da se zna od čega se nastavlja.
-- **Tjedan**: tjedni izvještaji, uz arhivu prošlih tjedana.
+- **Dan**: san, hrana s oznakama, težina, nizovi.
+- **Tjedan**: tjedni izvještaji, uz arhivu prošlih tjedana, s karticom navika.
 - suite: tema, PIN lock, Assistant panel.
 
 ## Izvještaj na kraju treninga
@@ -91,4 +102,4 @@ rekordom.
 ## Izvan opsega (za sad)
 
 Program ili plan treninga, pristup za coacha, kardio, Apple Health / Garmin, timer odmora,
-ručne forme za unos.
+brojanje kalorija, zdravstveni nalazi.

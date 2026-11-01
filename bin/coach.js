@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // coach CLI: log working sets, show reports, serve the app.
 import * as store from '../lib/store.js';
-import { sessionReport, weekReport, isoWeek, history, bests, e1rm, convert } from '../lib/core.js';
-import { sessionText, weekText } from '../lib/format.js';
+import { sessionReport, weekReport, isoWeek, history, bests, e1rm, convert, habitsAt, weekHabits, FOOD_TAGS } from '../lib/core.js';
+import { sessionText, weekText, dayText } from '../lib/format.js';
 
-const HELP = `coach — dnevnik snage
+const HELP = `coach — dnevnik snage i navika
 
   coach log <vježba> [setovi…] [--warmup] [--date D]   dodaj radne serije: 100x5  102.5x4@8  100x5x3@7.5 (=3 serije, RPE 7,5)
   coach warmup <vježba> [--off] [--date D]             označi zagrijavanje (2–4 serije) odrađeno
@@ -12,6 +12,11 @@ const HELP = `coach — dnevnik snage
   coach fix <vježba> <n> <kg>x<reps> [--date D]        ispravi n-tu seriju (od 1)
   coach note [vježba] "<tekst>" [--date D]             bilješka za trening ili vježbu
   coach calc <kg>x<reps>@<rpe> [--rir R | --rpe P] [--reps N]   isti zamor na drugom broju ponavljanja
+  coach sleep <1-5> [--date D]                         san (1 loše … 5 odlično)
+  coach weight <kg> [--date D]                         težina
+  coach eat "<što>" [--slatko] [--grickalice] [--kasno] [--time HH:MM] [--date D]   hrana
+  coach eat --rm <n> [--date D]                        makni n-tu stavku hrane (od 1)
+  coach day [D]                                        dan: san, težina, hrana, nizovi
   coach show [D]                                       trening (JSON)
   coach report --session [D]                           izvještaj treninga (default danas)
   coach report --week [YYYY-Www] [--save]              tjedni izvještaj (--save → data/reports/)
@@ -41,6 +46,12 @@ const summary = (d, id) => {
   const x = r?.exercises.find((e) => e.exercise === id);
   console.log(x ? sessionText({ ...r, exercises: [x] }).split('\n').slice(2, -2).join('\n') : 'spremljeno');
 };
+
+const saveDay = (d, what) => {
+  store.saveDay(d); store.commit(`dan ${d.date}: ${what}`);
+  console.log(dayText(d, habitsAt(store.days(), d.date)));
+};
+const num = (s) => Number(String(s).replace(',', '.'));
 
 const cmd = args.shift();
 switch (cmd) {
@@ -83,12 +94,37 @@ switch (cmd) {
     for (const r of repsF ? [Number(repsF)] : [1, 2, 3, 4, 5, 6, 8, 10]) console.log(`  ${String(r).padStart(2)} pon.: ${f(convert(set, r, rpe))} kg  (šipka ≈ ${bar(convert(set, r, rpe))})`);
     break;
   }
+  case 'sleep': {
+    const d = store.day(date()), v = num(args[0]);
+    if (!(v >= 1 && v <= 5)) die('san je ocjena 1–5');
+    d.sleep = Math.round(v); saveDay(d, 'san'); break;
+  }
+  case 'weight': {
+    const d = store.day(date()), v = num(args[0]);
+    if (!(v > 20 && v < 300)) die('npr. coach weight 87.5');
+    d.weight = Math.round(v * 10) / 10; saveDay(d, 'težina'); break;
+  }
+  case 'eat': {
+    const dt = date(), d = store.day(dt), rm = flag('--rm'), time = flag('--time');
+    if (rm) {
+      const [f] = d.food.splice(Number(rm) - 1, 1);
+      if (!f) die(`nema stavke ${rm}`);
+      saveDay(d, `makni ${f.text}`); break;
+    }
+    const tags = FOOD_TAGS.filter((t) => flag('--' + t, true));
+    const text = args.join(' ').trim() || die('što si pojeo?');
+    const f = { text, tags };
+    if (typeof time === 'string') f.time = time;
+    else if (dt === store.today()) f.time = new Date().toTimeString().slice(0, 5);
+    d.food.push(f); saveDay(d, text); break;
+  }
+  case 'day': { const dt = args[0] || store.today(); console.log(dayText(store.day(dt), habitsAt(store.days(), dt))); break; }
   case 'show': console.log(JSON.stringify(store.workout(args[0] || store.today()), null, 2)); break;
   case 'report': {
     const s = flag('--session'), wk = flag('--week'), sv = flag('--save', true);
     if (wk) {
       const week = typeof wk === 'string' ? wk : isoWeek(store.today());
-      const text = weekText(weekReport(store.workouts(), week));
+      const text = weekText(weekReport(store.workouts(), week), weekHabits(store.days(), week, store.today()));
       if (sv) { store.writeReport(week, text + '\n'); store.commit(`izvještaj ${week}`); }
       console.log(text);
     } else console.log(sessionText(sessionReport(store.workouts(), typeof s === 'string' ? s : args[0] || store.today())));

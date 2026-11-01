@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { metrics, sessionReport, weekReport, isoWeek, e1rm, pct1rm, convert } from '../lib/core.js';
+import { metrics, sessionReport, weekReport, isoWeek, e1rm, pct1rm, convert, streak, sugarDay, junkEvening, weekHabits, weekStart } from '../lib/core.js';
 
 test('metrics: heaviest, max volume, e1rm', () => {
   const m = metrics([{ kg: 100, reps: 5 }, { kg: 105, reps: 3 }, { kg: 105, reps: 2 }]);
@@ -51,4 +51,26 @@ test('week report uses best in week vs previous week', () => {
 test('convert keeps the effort: 60x5 @8 -> 3 reps @8', () => {
   assert.equal(Math.round(convert({ kg: 60, reps: 5, rpe: 8 }, 3, 8) * 10) / 10, 63.8);
   assert.equal(Math.round(convert({ kg: 60, reps: 5, rpe: 8 }, 5, 8) * 10) / 10, 60);
+});
+
+test('habits: streaks and the week', () => {
+  const days = [
+    { date: '2026-10-19', weight: 89, food: [] },
+    { date: '2026-10-22', food: [{ text: 'čokolada', tags: ['slatko'] }] },
+    { date: '2026-10-27', sleep: 4, weight: 88, food: [{ text: 'čips', tags: ['grickalice', 'kasno'] }] },
+    { date: '2026-10-28', sleep: 2, weight: 87.6, food: [{ text: 'keks', tags: ['slatko'] }] },
+  ];
+  assert.equal(weekStart('2026-W44'), '2026-10-26');
+  assert.equal(streak(days, '2026-11-01', sugarDay), 4);
+  assert.equal(streak(days, '2026-10-28', sugarDay), 0);
+  assert.equal(streak(days, '2026-10-21', sugarDay), 3);
+  assert.equal(streak(days, '2026-11-01', junkEvening), 5);
+  const h = weekHabits(days, '2026-W44', '2026-10-29');
+  assert.equal(h.days, 4);
+  assert.equal(h.sleep, 3);
+  assert.equal(h.weight, 87.8);
+  assert.equal(h.prevWeight, 89);
+  assert.equal(h.weightDelta, -1.2);
+  assert.equal(h.sugarDays, 1);
+  assert.equal(h.junkEvenings, 1);
 });

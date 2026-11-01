@@ -1,6 +1,6 @@
 # Coach
 
-Dnevnik snage: radne serije, oznaka zagrijavanja i tri parametra po vježbi (najteža serija, maks.
+Dnevnik snage i navika: san, težina, hrana (slatko, grickalice navečer) te radne serije, oznaka zagrijavanja i tri parametra po vježbi (najteža serija, maks.
 volumen serije, e1RM) uspoređena s prošlim treningom i rekordom. Unos kroz web app (PWA) ili kroz
 Claude (`coach` CLI). Vidi `SPEC.md` i `CLAUDE.md`.
 

@@ -164,6 +164,27 @@ summary { cursor:pointer; color:var(--accent); font-weight:600; font-size:14px; 
 .trow .mute { width:56px; text-align:right; font-size:13px; }
 .trow.on { background:var(--soft); }
 
+/* dan */
+.sleep { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.sleep button { border:1px solid var(--line); background:var(--field); border-radius:14px; padding:8px 0 6px; display:flex; flex-direction:column; align-items:center; }
+.sleep b { font-size:22px; line-height:1.1; }
+.sleep span { font-size:11px; color:var(--mute); font-weight:600; }
+.sleep button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+.sleep button.on span { color:#fff; opacity:.9; }
+.food { margin-bottom:4px; }
+.food li { padding:8px 4px 8px 12px; flex-wrap:wrap; }
+.tag { display:inline-flex; align-items:center; gap:3px; font-size:12px; font-weight:600; padding:3px 8px; border-radius:999px; background:var(--card); color:var(--mute); }
+.tag.slatko, .tag.grickalice { color:var(--down); background:var(--down-soft); }
+.search.plain { background:var(--card); }
+.chips.tags { margin-top:10px; display:grid; grid-template-columns:repeat(3,1fr); }
+.chips.tags .pill { display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:0 6px; font-size:14px; min-width:0; }
+.hint { margin:10px 0 0; display:flex; align-items:center; gap:6px; }
+.wrow { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+.wrow .stepper { background:var(--field); }
+.wrow .stepper button { background:var(--card); }
+.wrow .btn { height:100%; }
+.tiles.two { grid-template-columns:1fr 1fr; }
+
 /* bottom nav */
 nav { position:fixed; left:0; right:0; bottom:0; z-index:6; background:color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); }
 nav > div { max-width:560px; margin:0 auto; display:flex; }
@@ -200,6 +221,7 @@ nav a.on span.pip { background:var(--soft); }
 </div></div>
 <main id="view"></main>
 <nav><div>
+  <a href="#day" data-tab="day"><span class="pip"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span>Dan</a>
   <a href="#today" data-tab="today"><span class="pip"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/></svg></span>Trening</a>
   <a href="#exercises" data-tab="exercises"><span class="pip"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>Napredak</a>
   <a href="#week" data-tab="week"><span class="pip"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg></span>Tjedan</a>

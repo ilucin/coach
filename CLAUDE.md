@@ -1,6 +1,6 @@
 # Coach — dnevnik snage
 
-Osobni dnevnik treninga snage. Spec: `SPEC.md`. Bez ovisnosti: Node 24, ESM, `node --test`.
+Osobni dnevnik treninga snage i dnevnih navika (san, težina, hrana). Spec: `SPEC.md`. Bez ovisnosti: Node 24, ESM, `node --test`.
 
 - `bin/coach.js`: CLI. `lib/core.js`: izračuni (čisti, testirani). `lib/store.js`: JSON u `data/`.
   `lib/server.js`: API + statički PWA iz `web/index.html` (vanilla JS).
@@ -25,6 +25,22 @@ Kad korisnik priča o treningu, upiši ga CLI-jem (`node bin/coach.js …`, alia
 7. "Gotovo" / "kraj treninga" → `coach report --session` i kratak sažetak: rekordi, napredak, što
    stagnira.
 
+## Dan: san, težina, hrana
+
+Kad korisnik spomene san, vaganje ili hranu, upiši u dan (`--date YYYY-MM-DD` za drugi dan):
+
+- San kao ocjena 1–5 (1 loše, 3 ok, 5 odlično): `coach sleep 4`. Ako opiše riječima, procijeni
+  ocjenu i reci koju si upisao.
+- Težina: `coach weight 87.6`.
+- Hrana: `coach eat "čips" --grickalice --kasno`. Oznake:
+  - `--slatko`: sve s dodanim šećerom (slatkiši, kolači, keksi, sokovi, zaslađeni jogurti);
+  - `--grickalice`: čips, smoki, krekeri, kikiriki i slično;
+  - `--kasno`: pojedeno navečer (od ~20 h ili manje od 3 h prije spavanja). `--time HH:MM` ako
+    se zna vrijeme.
+  Zdrava hrana ide bez oznaka. Ispravak: `coach eat --rm <n>`; pregled: `coach day`.
+- Cilj je što manje šećera i grickalica navečer. Nakon unosa javi niz (dana bez slatkog, večeri
+  bez grickalica) kratko i bez moraliziranja.
+
 Tjedni izvještaj: `coach report --week --save` izračuna brojke i spremi ih u
 `data/reports/<YYYY-Www>.md`. Na vrh dodaj kratak komentar trenera (2–4 rečenice, na hrvatskom,
-bez izmišljanja brojki) pa commitaj u `data/` (`git -C data commit`).
+bez izmišljanja brojki, uključi i navike: san, težinu, slatko i grickalice navečer) pa commitaj u `data/` (`git -C data commit`).

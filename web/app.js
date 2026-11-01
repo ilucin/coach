@@ -1,5 +1,6 @@
-// Coach PWA: Danas (log), Vježbe (progress), Tjedan (weekly), Preračun (set converter).
-import { e1rm, convert } from '/core.js';
+// Coach PWA: Dan (sleep, weight, food), Trening (log), Napredak (progress), Tjedan (weekly),
+// Preračun (set converter).
+import { e1rm, convert, isoWeek as isoWeekOf } from '/core.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -43,6 +44,13 @@ const P = {
   search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
   msg: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
   history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  scale: '<rect x="3" y="3" width="18" height="18" rx="5"/><path d="M7.5 10a4.5 4.5 0 0 1 9 0"/><path d="m12 10 1.6-2.2"/>',
+  cookie: '<path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/>',
+  popcorn: '<path d="M18 8a2 2 0 0 0 0-4 2 2 0 0 0-4 0 2 2 0 0 0-4 0 2 2 0 0 0-4 0 2 2 0 0 0 0 4"/><path d="M10 22 9 8"/><path d="m14 22 1-14"/><path d="M20 8c.5 0 .9.4.8 1l-2.6 12c-.1.5-.7 1-1.2 1H7c-.6 0-1.1-.4-1.2-1L3.2 9c-.1-.6.3-1 .8-1Z"/>',
+  utensils: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+  leaf: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>',
   sparkle: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
 };
 const ic = (name, size = 18, cls = '') => `<svg class="ic ${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[name]}</svg>`;
@@ -111,6 +119,10 @@ function glossary() {
     ${row('layers', 'Volumen', 'Kilaža × ponavljanja u jednoj seriji. 100 kg × 5 = 500 kg. Pokazuje se najjača serija.')}
     ${row('target', 'Max', 'Procjena koliko bi digao za jedno ponavljanje, iz kilaže, ponavljanja i rezerve. Najbolji pokazatelj napretka.')}
     ${row('trophy', 'Rekord', 'Najbolje dosad za tu vježbu.')}
+    ${row('moon', 'San', 'Ocjena od 1 (loše) do 5 (odlično), kako se osjećaš kad se probudiš.')}
+    ${row('cookie', 'Slatko', 'Sve s dodanim šećerom: slatkiši, kolači, sokovi, zaslađeni jogurti. Cilj: što više dana bez.')}
+    ${row('popcorn', 'Grickalice navečer', 'Čips, smoki, slatko i slično, pojedeno navečer. Broji se koliko večeri zaredom bez.')}
+    ${row('scale', 'Težina', 'Važan je tjedni prosjek, ne pojedini dan. Težina dnevno skače i do 1 kg.')}
     <button class="btn wide" data-close>Jasno</button>`);
 }
 
@@ -130,6 +142,80 @@ function pickExercise(onPick, exclude = []) {
     let id = b.dataset.id;
     if (b.dataset.new) { id = (await api('exercises', { method: 'POST', body: { name: $('#q', el).value.trim() } })).id; exercises = await api('exercises'); }
     closeSheet(); onPick(id);
+  };
+}
+
+// --- Dan --------------------------------------------------------------------
+const SLEEP = ['', 'loše', 'slabo', 'ok', 'dobro', 'odlično'];
+const TAGS = { slatko: ['cookie', 'Slatko'], grickalice: ['popcorn', 'Grickalice'], kasno: ['moon', 'Navečer'] };
+const days = (k, one, many) => `${k === 1 ? one : many}`;
+
+function weightLine(h) {
+  if (h.weight == null) return '';
+  const d = h.weightDelta;
+  return `<div class="prog ${d == null || d === 0 ? 'flat' : 'new'}">${ic('chart', 16)} <span>Prosjek ovaj tjedan <b>${n(h.weight)} kg</b>${d != null ? ` · ${sign(d)} kg od prošlog` : ''}</span></div>`;
+}
+
+async function renderDay() {
+  const { day, habits: h } = await api('day/' + state.date);
+  const isToday = state.date === today();
+  const f = (state.food ??= { text: '', tags: new Set(isToday && new Date().getHours() >= 20 ? ['kasno'] : []) });
+  const sugar = day.food.some((x) => x.tags?.includes('slatko'));
+  const kg = state.kg ?? day.weight ?? h.weight ?? 80;
+  $('#view').innerHTML = `
+    <section class="hero">
+      <div class="row">
+        <div class="grow"><div class="eyebrow">${isToday ? 'Danas' : 'Dan'}</div><h1>${cap(fmtLong(state.date))}</h1></div>
+        <label class="datebtn" aria-label="Promijeni dan">${ic('calendar', 20)}<input type="date" id="date" value="${state.date}"></label>
+      </div>
+      <div class="stats">
+        <div><b>${h.sugarStreak}</b><span>${days(h.sugarStreak, 'dan', 'dana')} bez slatkog</span></div>
+        <div><b>${h.junkStreak}</b><span>${days(h.junkStreak, 'večer', 'večeri')} bez grickalica</span></div>
+        <div><b>${day.sleep || '–'}</b><span>san${day.sleep ? ` · ${SLEEP[day.sleep]}` : ''}</span></div>
+      </div>
+    </section>
+    <section class="card">
+      <h3>${ic('moon', 16)} Kako si spavao?</h3>
+      <div class="sleep">${[1, 2, 3, 4, 5].map((v) => `<button data-sleep="${v}" class="${day.sleep === v ? 'on' : ''}"><b>${v}</b><span>${SLEEP[v]}</span></button>`).join('')}</div>
+    </section>
+    <section class="card">
+      <h3>${ic('utensils', 16)} Što si jeo?</h3>
+      <div class="prog ${sugar ? 'down' : 'up'}">${ic(sugar ? 'cookie' : 'leaf', 16)} ${sugar ? (isToday ? 'Danas je bilo slatkog. Sutra novi niz.' : 'Taj dan je bilo slatkog.') : (isToday ? 'Danas bez slatkog, samo tako' : 'Taj dan bez slatkog')}</div>
+      ${day.food.length ? `<ol class="sets food">${day.food.map((x, i) => `<li><span class="grow"><b>${esc(x.text)}</b>${x.time ? ` <span class="mute sm">${x.time}</span>` : ''}</span>${(x.tags || []).map((t) => `<span class="tag ${t}">${ic(TAGS[t][0], 13)} ${TAGS[t][1]}</span>`).join('')}<button class="del" data-del="${i}" aria-label="Obriši">${ic('x', 16)}</button></li>`).join('')}</ol>` : ''}
+      <div class="form">
+        <label class="search plain">${ic('utensils', 18)}<input id="ftext" placeholder="npr. čokolada, čips, piletina…" value="${esc(f.text)}" autocomplete="off"></label>
+        <div class="chips tags">${Object.entries(TAGS).map(([t, [i, l]]) => `<button type="button" class="pill ${f.tags.has(t) ? 'on' : ''}" data-tag="${t}">${ic(i, 15)} ${l}</button>`).join('')}</div>
+        <button class="btn wide" id="fadd">${ic('plus', 18)} Dodaj</button>
+      </div>
+      <p class="mute sm hint">${ic('msg', 13)} Ili samo reci Claudeu što si pojeo.</p>
+    </section>
+    <section class="card">
+      <h3>${ic('scale', 16)} Težina</h3>
+      <div class="wrow">
+        <div class="stepper"><div><button data-w="-0.1" aria-label="manje">${ic('minus', 18)}</button><input id="wkg" type="number" inputmode="decimal" step="0.1" value="${kg}"><button data-w="0.1" aria-label="više">${ic('plus', 18)}</button></div><span>kg</span></div>
+        <button class="btn" id="wsave">${ic('check', 18)} ${day.weight ? 'Ispravi' : 'Spremi'}</button>
+      </div>
+      ${day.weight ? `<p class="mute sm">Upisano: <b>${n(day.weight)} kg</b>. Najbolje se vagati ujutro, prije doručka.</p>` : '<p class="mute sm">Najbolje ujutro, prije doručka. Ne mora svaki dan.</p>'}
+      ${weightLine(h)}
+    </section>`;
+
+  const v = $('#view');
+  $('#date').onchange = (ev) => { state.date = ev.target.value || today(); state.food = null; state.kg = null; route(); };
+  $('#ftext').oninput = (ev) => (f.text = ev.target.value);
+  $('#wkg').oninput = (ev) => (state.kg = +ev.target.value);
+  const save = async (path, body, method = 'POST') => { await api(`day/${state.date}${path}`, { method, body }); };
+  v.onclick = async (e) => {
+    const t = e.target.closest('[data-tag]'), sl = e.target.closest('[data-sleep]'), w = e.target.closest('[data-w]'), del = e.target.closest('[data-del]');
+    if (t) { f.tags.has(t.dataset.tag) ? f.tags.delete(t.dataset.tag) : f.tags.add(t.dataset.tag); t.classList.toggle('on'); }
+    if (sl) { const val = +sl.dataset.sleep; await save('', { sleep: day.sleep === val ? null : val }); toast(`${ic('moon', 16)} San spremljen`); renderDay(); }
+    if (w) { const inp = $('#wkg'); inp.value = state.kg = Math.round((+inp.value + +w.dataset.w) * 10) / 10; }
+    if (del) { await save('/food', { index: +del.dataset.del }, 'DELETE'); renderDay(); }
+    if (e.target.closest('#wsave')) { await save('', { weight: +$('#wkg').value }); state.kg = null; toast(`${ic('check', 16)} Težina spremljena`); renderDay(); }
+    if (e.target.closest('#fadd')) {
+      if (!f.text.trim()) return $('#ftext').focus();
+      await save('/food', { text: f.text, tags: [...f.tags], time: isToday ? new Date().toTimeString().slice(0, 5) : undefined });
+      state.food = null; toast(`${ic('check', 16)} Zapisano`); renderDay();
+    }
   };
 }
 
@@ -237,9 +323,22 @@ function chart(points) {
     <div class="axis"><span><b>${n(points[0].y)} kg</b>${fmtShort(points[0].d)}</span><span><b>${n(points.at(-1).y)} kg</b>${fmtShort(points.at(-1).d)}</span></div>`;
 }
 
+// Weekly averages once there are two weeks of weigh-ins, single weigh-ins before that.
+function weightChart(weights) {
+  const wk = {};
+  for (const w of weights) (wk[isoWeekOf(w.date)] ??= []).push(w);
+  const weeks = Object.values(wk);
+  const pts = weeks.length >= 2
+    ? weeks.map((ws) => ({ y: Math.round((ws.reduce((t, w) => t + w.kg, 0) / ws.length) * 10) / 10, d: ws[0].date }))
+    : weights.map((w) => ({ y: w.kg, d: w.date }));
+  return chart(pts).replace('nakon drugog treninga', 'nakon drugog vaganja');
+}
+
 async function renderExercises() {
-  const list = (await api('summary')).sort((a, b) => (b.last || '').localeCompare(a.last || ''));
-  $('#view').innerHTML = `<header class="ph"><h1>Napredak</h1><p class="mute">Tvoj max po vježbi i promjena od prošlog puta</p></header>
+  const [list0, { weights }] = await Promise.all([api('summary'), api('day/' + today())]);
+  const list = list0.sort((a, b) => (b.last || '').localeCompare(a.last || ''));
+  $('#view').innerHTML = `<header class="ph"><h1>Napredak</h1><p class="mute">Težina i tvoj max po vježbi</p></header>
+    ${weights.length ? `<section class="card"><h3>${ic('scale', 16)} Težina${weights.length > 1 ? ' <span class="mute sm">(tjedni prosjek)</span>' : ''}</h3>${weightChart(weights)}</section>` : ''}
     <div class="list">${list.map((e) => `<a class="card li" href="#ex/${e.id}">
       <span class="ico big">${ic('dumbbell', 22)}</span>
       <div class="grow"><b>${esc(e.name)}</b><div class="mute sm">${e.last ? `${e.sessions}× · zadnji put ${dt(e.last).toLocaleDateString('hr-HR', { day: 'numeric', month: 'numeric' })}` : 'još nije rađena'}</div></div>
@@ -289,8 +388,8 @@ const comment = (text) => (text || '').replace(/^# .*\n+/, '').split(/^Treninzi:
 async function renderWeek(week) {
   const weeks = await api('weeks');
   week = week || weeks[0];
-  if (!week) { $('#view').innerHTML = `<header class="ph"><h1>Tjedan</h1></header><div class="empty">${ic('calendar', 40)}<p>Još nema treninga.</p></div>`; return; }
-  const { report, text } = await api('week/' + week);
+  if (!week) { $('#view').innerHTML = `<header class="ph"><h1>Tjedan</h1></header><div class="empty">${ic('calendar', 40)}<p>Još nema zapisa.</p></div>`; return; }
+  const { report, habits: h, text } = await api('week/' + week);
   const prs = report.exercises.filter((x) => Object.values(x.compare).some((c) => c.pr));
   const up = report.exercises.filter((x) => x.compare.e1rm.vsPrev?.pct > 0).length;
   const i = weeks.indexOf(week);
@@ -305,6 +404,12 @@ async function renderWeek(week) {
         <div><b>${prs.length}</b><span>${prs.length === 1 ? 'rekord' : 'rekorda'}</span></div>
       </div>
     </section>
+    ${h.logged ? `<section class="card"><h3>${ic('sun', 16)} Navike</h3><div class="tiles two">
+      <div class="tile"><div class="tl">${ic('cookie', 14)} Bez slatkog</div><div class="tv">${h.days - h.sugarDays}<small> / ${h.days} dana</small></div></div>
+      <div class="tile"><div class="tl">${ic('popcorn', 14)} Bez grickalica</div><div class="tv">${h.days - h.junkEvenings}<small> / ${h.days} večeri</small></div></div>
+      <div class="tile"><div class="tl">${ic('moon', 14)} San</div><div class="tv">${h.sleep != null ? n(h.sleep) : '–'}<small> / 5</small></div><div class="ts">${h.sleepDays ? `prosjek, ${h.sleepDays} ${h.sleepDays === 1 ? 'noć' : 'noći'}` : 'nije upisan'}</div></div>
+      <div class="tile"><div class="tl">${ic('scale', 14)} Težina</div><div class="tv">${h.weight != null ? n(h.weight) : '–'}<small> kg</small></div><div class="tf">${h.weightDelta != null ? `<span class="ch flat">${sign(h.weightDelta)} kg</span>` : '<span class="ts">prosjek tjedna</span>'}</div></div>
+    </div></section>` : ''}
     ${comment(text) ? `<section class="card quote"><h3>${ic('msg', 16)} Komentar</h3><p>${esc(comment(text))}</p></section>` : ''}
     ${report.exercises.map((x) => `<section class="card ex">
       <div class="exh"><span class="ico big">${ic('dumbbell', 22)}</span><div class="grow"><h2>${esc(exName(x.exercise))}</h2>
@@ -364,22 +469,23 @@ function renderCalc(kg = 60, reps = 5, rpe = 8) {
 
 // --- Router -----------------------------------------------------------------
 async function route() {
-  const [tab, ...rest] = (location.hash.slice(1) || 'today').split('/');
+  const [tab, ...rest] = (location.hash.slice(1) || 'day').split('/');
   const t = tab === 'ex' ? 'exercises' : tab;
-  for (const b of document.querySelectorAll('nav a')) b.classList.toggle('on', b.dataset.tab === t);
+  for (const b of document.querySelectorAll('nav a')) b.classList.toggle('on', b.dataset.tab === (t === 'today' || t === 'exercises' || t === 'week' || t === 'calc' ? t : 'day'));
   v.onclick = null; v.oninput = null;
   try {
     if (tab === 'ex') await renderExercise(rest[0]);
     else if (t === 'exercises') await renderExercises();
     else if (t === 'week') await renderWeek(rest[0]);
     else if (t === 'calc') renderCalc(...rest.map(Number).filter((x) => x > 0));
-    else await renderToday();
+    else if (t === 'today') await renderToday();
+    else await renderDay();
   } catch (e) { $('#view').innerHTML = `<div class="card">Greška: ${esc(e.message)}</div>`; }
   window.scrollTo(0, 0);
 }
 const v = $('#view');
 $('#help').onclick = glossary;
 window.addEventListener('hashchange', route);
-document.addEventListener('visibilitychange', () => { if (!document.hidden && (!location.hash || location.hash === '#today')) route(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && ['', '#day', '#today'].includes(location.hash)) route(); });
 exercises = await api('exercises');
 route();
