@@ -14,7 +14,7 @@ Osobni dnevnik treninga snage i dnevnih navika (san, težina, hrana). Spec: `SPE
 
 Kad korisnik priča o treningu, upiši ga CLI-jem (`node bin/coach.js …`, alias `coach`):
 
-1. Prepoznaj vježbu: `coach exercises`. Ako je nema, pitaj, pa `coach exercise add "Ime" --alias a,b`.
+1. Prepoznaj vježbu: `coach exercises`. Ako je nema, pitaj, pa `coach exercise add "Ime" --alias a,b` (`--video URL` za link na izvedbu; kasnije `coach exercise video <vježba> URL`).
 2. Zagrijavanje: bilježi se samo oznaka (2–4 serije), bez kilaža → `--warmup` ili `coach warmup`.
 3. Radne (top) serije: `coach log <vježba> 100x5@8 102.5x4@8.5` (`100x5x3@8` = tri serije). RPE = 10 − RIR ("dva u rezervi" = @8); kad nije rečen, izostavi ga. Datum je
    danas, inače `--date YYYY-MM-DD`.

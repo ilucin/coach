@@ -22,7 +22,8 @@ const HELP = `coach — dnevnik snage i navika
   coach report --week [YYYY-Www] [--save]              tjedni izvještaj (--save → data/reports/)
   coach history <vježba>                               povijest i rekordi vježbe
   coach exercises                                      popis vježbi
-  coach exercise add "<ime>" [--alias a,b]             nova vježba
+  coach exercise add "<ime>" [--alias a,b] [--video URL]   nova vježba
+  coach exercise video <vježba> [URL]                  postavi (ili makni) video s izvedbom
   coach serve [--port 4340]                            web app`;
 
 const args = process.argv.slice(2);
@@ -139,8 +140,15 @@ switch (cmd) {
   }
   case 'exercises': for (const e of store.exercises()) console.log(`${e.id}\t${e.name}${e.aliases?.length ? `\t(${e.aliases.join(', ')})` : ''}`); break;
   case 'exercise': {
-    if (args.shift() !== 'add') die('coach exercise add "<ime>"');
-    const al = flag('--alias'); const e = store.addExercise(args.join(' '), typeof al === 'string' ? al.split(',').map((s) => s.trim()) : []);
+    const sub = args.shift();
+    if (sub === 'video') {
+      const e = ex(args.shift()), url = args.shift();
+      if (url && !/^https?:\/\//.test(url)) die('video mora biti URL (https://…)');
+      store.setVideo(e.id, url); store.commit(`exercise: ${e.name} video`); console.log(`${e.id}\t${url || '(bez videa)'}`); break;
+    }
+    if (sub !== 'add') die('coach exercise add "<ime>" | coach exercise video <vježba> [url]');
+    const al = flag('--alias'), vid = flag('--video');
+    const e = store.addExercise(args.join(' '), typeof al === 'string' ? al.split(',').map((s) => s.trim()) : [], typeof vid === 'string' ? vid : undefined);
     store.commit(`exercise: ${e.name}`); console.log(`${e.id}\t${e.name}`); break;
   }
   case 'serve': { const { serve } = await import('../lib/server.js'); const pt = flag('--port'); serve(Number(pt) || 4340); break; }

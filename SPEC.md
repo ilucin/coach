@@ -7,7 +7,7 @@ upaljenom računalu, PWA na mobitelu, unos kroz Claude. UI je na hrvatskom.
 ## Pojmovi
 
 - **Vježba**: npr. bench press, čučanj. Ima ime, aliase ("bench", "potisak s klupe") i opcionalno
-  `bodyweight`, za vježbe bez kilaže.
+  `bodyweight`, za vježbe bez kilaže, te opcionalni `video` (link na izvedbu, prikazan na stranici vježbe).
 - **Trening**: datum, popis vježbi, opcionalna bilješka.
 - **Unos vježbe na treningu**:
   - `zagrijavanje`: označeno da/ne (2–4 serije). Nema kilaža ni ponavljanja.
