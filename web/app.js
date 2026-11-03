@@ -59,6 +59,7 @@ const ic = (name, size = 18, cls = '') => `<svg class="ic ${cls}" width="${size}
 // --- Shared bits ------------------------------------------------------------
 let exercises = [];
 const exName = (id) => exercises.find((e) => e.id === id)?.name || id;
+const vid = (id) => exercises.find((e) => e.id === id)?.video;
 const RIRS = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4];
 const rirTxt = (r) => (r === 0 ? 'otkaz' : String(r).replace('.5', '½').replace(/^0½$/, '½'));
 const setTxt = (s) => `${n(s.kg)} kg × ${s.reps}`;
@@ -241,6 +242,7 @@ async function renderToday() {
           ${r?.prev ? `<div class="mute sm">${ic('history', 13)} Zadnji put ${fmtShort(r.prev.date)}: ${r.prev.sets.map((s) => `${n(s.kg)}×${s.reps}`).join(', ')}</div>` : '<div class="mute sm">Prvi put radiš ovu vježbu</div>'}
         </div>
         ${hasPr ? `<span class="trophy">${ic('trophy', 20)}</span>` : ''}
+        ${vid(e.exercise) ? `<a class="vid" href="${esc(vid(e.exercise))}" target="_blank" rel="noopener">${ic('play', 14)} Video</a>` : ''}
       </div>
       <button class="warm ${e.warmup ? 'on' : ''}" data-act="warm"><span class="box">${ic('check', 14)}</span>${ic('thermo', 15)} Zagrijao sam se <span class="mute">(2–4 lagane serije)</span></button>
       ${e.sets.length ? `<ol class="sets">${e.sets.map((s, i) => `<li><span class="num">${i + 1}</span><span class="grow"><b>${n(s.kg)} kg</b> × ${s.reps}</span>${s.rpe != null ? `<span class="rir">${ic('battery', 13)} ${rirTxt(10 - s.rpe)}</span>` : ''}<button class="del" data-act="del" data-i="${i}" aria-label="Obriši seriju">${ic('x', 16)}</button></li>`).join('')}</ol>` : ''}
@@ -342,7 +344,7 @@ async function renderExercises() {
     ${weights.length ? `<section class="card"><h3>${ic('scale', 16)} Težina${weights.length > 1 ? ' <span class="mute sm">(tjedni prosjek)</span>' : ''}</h3>${weightChart(weights)}</section>` : ''}
     <div class="list">${list.map((e) => `<a class="card li" href="#ex/${e.id}">
       <span class="ico big">${ic('dumbbell', 22)}</span>
-      <div class="grow"><b>${esc(e.name)}</b><div class="mute sm">${e.last ? `${e.sessions}× · zadnji put ${dt(e.last).toLocaleDateString('hr-HR', { day: 'numeric', month: 'numeric' })}` : 'još nije rađena'}</div></div>
+      <div class="grow"><b>${esc(e.name)}</b><div class="mute sm">${e.video ? `${ic('play', 11)} ` : ''}${e.last ? `${e.sessions}× · zadnji put ${dt(e.last).toLocaleDateString('hr-HR', { day: 'numeric', month: 'numeric' })}` : 'još nije rađena'}</div></div>
       ${e.e1rm ? `<div class="right"><div class="big-n">${n(e.e1rm)}<small> kg</small></div>${e.trend != null ? `<span class="ch ${e.trend > 0 ? 'up' : e.trend < 0 ? 'down' : 'flat'}">${ic(e.trend > 0 ? 'up' : e.trend < 0 ? 'down' : 'flat', 13)} ${sign(e.trend)}%</span>` : '<span class="mute sm">max</span>'}</div>` : ''}
       ${ic('right', 18, 'mute')}</a>`).join('')}</div>`;
 }
