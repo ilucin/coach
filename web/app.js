@@ -360,7 +360,7 @@ async function renderExercise(id) {
     <a class="back" href="#exercises">${ic('left', 18)} Napredak</a>
     <section class="hero">
       <div class="eyebrow">${esc(exercise?.name || id)}</div>
-      ${exercise?.video ? `<a class="link" href="${esc(exercise.video)}" target="_blank" rel="noopener">${ic('play', 15)} Video izvedbe</a>` : ''}
+      ${exercise?.video ? `<a class="hero-pr hero-vid" href="${esc(exercise.video)}" target="_blank" rel="noopener">${ic('play', 15)} Video izvedbe</a>` : ''}
       ${last ? `<div class="hero-n">${n(last.metrics.e1rm.value)}<small> kg</small></div><div class="hero-sub">procjena maksa (1 ponavljanje)</div>
       ${total != null ? `<div class="hero-pr">${ic(total >= 0 ? 'up' : 'down', 16)} ${sign(Math.round(total * 10) / 10)}% od prvog zapisa (${fmtShort(first.date)})</div>` : ''}` : '<p>Još nema zapisa.</p>'}
     </section>
