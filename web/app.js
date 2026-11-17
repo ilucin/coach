@@ -488,7 +488,44 @@ async function route() {
   window.scrollTo(0, 0);
 }
 const v = $('#view');
+// --- Asistent: Fleetov embed chat s Claude sesijama u Coach repou (lib/assistant.js) ----------
+// Otvoren jednom, iframe ostaje (zatvaranje ga samo skriva), pa sesija i nacrt poruke prežive.
+async function assistant() {
+  const { url } = await api('assistant').catch(() => ({ url: null }));
+  if (!url) return;
+  const btn = $('#assist'), panel = $('#assistant'), close = $('#assist-close');
+  const dark = matchMedia('(prefers-color-scheme: dark)'), phone = matchMedia('(max-width: 639.98px)');
+  const behind = [$('.top'), $('#view'), $('nav')];
+  const themed = () => { const [base, hash] = url.split('#'); return `${base}&theme=${dark.matches ? 'dark' : 'light'}#${hash}`; };
+  let frame = null, opener = null;
+  const inert = () => { const on = !panel.hidden && phone.matches; behind.forEach((el) => (el.inert = on)); };
+  const set = (open) => {
+    if (open === !panel.hidden) return;
+    if (open) {
+      opener = document.activeElement;
+      if (!frame) {
+        frame = Object.assign(document.createElement('iframe'), { title: 'Asistent (Fleet)', src: themed() });
+        frame.allow = 'microphone; clipboard-read; clipboard-write';
+        panel.append(frame);
+      }
+    }
+    panel.hidden = !open;
+    btn.setAttribute('aria-pressed', String(open));
+    document.documentElement.classList.toggle('assist-open', open);
+    inert();
+    if (open) close.focus();
+    else if (opener?.isConnected && (document.activeElement === document.body || panel.contains(document.activeElement))) opener.focus();
+  };
+  btn.hidden = false;
+  btn.onclick = () => set(panel.hidden);
+  close.onclick = () => set(false);
+  // Escape zatvara panel, osim kad je otvoren sheet (on prvi).
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#sheet').hidden) set(false); });
+  phone.addEventListener('change', inert);
+  dark.addEventListener('change', () => { if (frame) frame.src = themed(); });
+}
 $('#help').onclick = glossary;
+assistant();
 window.addEventListener('hashchange', route);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && ['', '#day', '#today'].includes(location.hash)) route(); });
 exercises = await api('exercises');
